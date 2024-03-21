@@ -5,13 +5,17 @@
  **/
 
 #include<iostream>
+#include<ctime>
 using namespace std;
 
 int main()
 {
+    clock_t start, end;
     int i = 0, j = 0, k = 0, n = 0;
     double **mat = NULL;
     double d = 0.0;
+
+    start = clock();
     
     cin >> n;
     
@@ -84,6 +88,21 @@ int main()
     }
     
     cout << n << endl;
+
+    cout << "" << endl;
+
+    end = clock();
+
+    // Hitung total waktu yang dibutuhkan
+    double total_time = (double)(end - start) / CLOCKS_PER_SEC;
+
+    // Hitung rata-rata waktu yang dibutuhkan
+    double avg_time = total_time;
+
+    cout << "Total time: " << total_time << " seconds" << endl;
+    cout << "Average time: " << avg_time << " seconds" << endl;
+    cout << "" << endl;
+
     for(i=0; i < n; ++i)
     {
         for(j = n; j < 2*n; ++j)
@@ -99,6 +118,7 @@ int main()
         delete[] mat[i];
     }
     delete[] mat;
-    
+
+
     return 0;
 }

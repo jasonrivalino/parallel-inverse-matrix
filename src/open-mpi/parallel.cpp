@@ -91,6 +91,25 @@ int main(int argc, char *argv[]) {
     }
     
     cout << n << endl;
+
+    cout << "" << endl;
+
+    // Hitung waktu selesai
+    finish_time = MPI_Wtime();
+
+    // Hitung total waktu yang dibutuhkan
+    total_time = finish_time - start_time;
+    // MPI_Reduce(&total_time, &total_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+
+    // Hitung rata-rata waktu yang dibutuhkan
+    avg_time = total_time / size;
+
+    if (rank == 0) {
+        std::cout << "Time taken: " << total_time << " seconds" << std::endl;
+        std::cout << "Average time taken: " << avg_time << " seconds" << std::endl;
+        cout << "" << endl;
+    }
+
     for(i=0; i < n; ++i)
     {
         for(j = n; j < 2*n; ++j)
@@ -107,20 +126,6 @@ int main(int argc, char *argv[]) {
     }
     delete[] mat;
 
-    // Hitung waktu selesai
-    finish_time = MPI_Wtime();
-
-    // Hitung total waktu yang dibutuhkan
-    total_time = finish_time - start_time;
-    MPI_Reduce(&total_time, &total_time, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-    // Hitung rata-rata waktu yang dibutuhkan
-    avg_time = total_time / size;
-
-    if (rank == 0) {
-        std::cout << "Time taken: " << total_time << " seconds" << std::endl;
-        std::cout << "Average time taken: " << avg_time << " seconds" << std::endl;
-    }
 
     MPI_Finalize();
 
