@@ -46,7 +46,7 @@ int main()
             }
         }
     }
-    
+
     // Partial pivoting
     for(i = n; i > 1; --i)
     {
@@ -64,28 +64,44 @@ int main()
     // Reducing To Diagonal Matrix
     for(i = 0; i < n; ++i)
     {
-        for(j = 0; j < 2*n; ++j)
+        for(j = 0; j < n; ++j)
         {
             if(j != i)
             {
-                d = mat[j][i] / mat[i][i];
-                for(k = 0; k < n*2; ++k)
+                if(mat[i][i] != 0)
                 {
-                    mat[j][k] -= mat[i][k]*d;
+                    d = mat[j][i] / mat[i][i];
+                    for(k = 0; k < 2*n; ++k)
+                    {
+                        mat[j][k] -= mat[i][k]*d;
+                    }
                 }
             }
         }
     }
-    
+
+    for(i=0; i < n; ++i)
+        {
+            for(j = 0; j < 2*n; ++j)
+            {
+                cout << mat[i][j] << " ";
+            }
+            cout << endl;
+        }
+
     // Reducing To Unit Matrix
     for(i = 0; i < n; ++i)
     {
-        d = mat[i][i];
-        for(j = 0; j < 2*n; ++j)
+        if(mat[i][i] != 0)
         {
-            mat[i][j] = mat[i][j]/d;
+            d = mat[i][i];
+            for(j = 0; j < 2*n; ++j)
+            {
+                mat[i][j] = mat[i][j]/d;
+            }
         }
     }
+
     
     cout << n << endl;
 
