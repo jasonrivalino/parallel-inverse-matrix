@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <cmath>
 using namespace std;
 
 int main()
@@ -15,7 +16,6 @@ int main()
     double **mat = NULL;
     double d = 0.0;
 
-    start = clock();
 
     cin >> n;
 
@@ -34,6 +34,9 @@ int main()
             cin >> mat[i][j];
         }
     }
+
+    // Mulai menghitung waktu
+    start = clock();
 
     // Initializing Right-hand side to identity matrix
     for (i = 0; i < n; ++i)
@@ -93,11 +96,12 @@ int main()
         }
     }
 
+    end = clock();
+    
     cout << n << endl;
 
     cout << "" << endl;
 
-    end = clock();
 
     // Hitung total waktu yang dibutuhkan
     double total_time = (double)(end - start) / CLOCKS_PER_SEC;
@@ -109,11 +113,15 @@ int main()
     cout << "Average time: " << avg_time << " seconds" << endl;
     cout << "" << endl;
 
-    for (i = 0; i < n; ++i)
+    for(i = 0; i < n; ++i)
     {
-        for (j = n; j < 2 * n; ++j)
+        for(j = 0; j < 2*n; ++j)
         {
-            cout << mat[i][j] << " ";
+            if (abs(mat[i][j]) < 1e-5) {
+                cout << "0 ";
+            } else {
+                cout << mat[i][j] << " ";
+            }
         }
         cout << endl;
     }
