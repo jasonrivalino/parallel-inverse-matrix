@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     int i, j;
     double d;
     int startLocal, endLocal;
-    // double start_time, finish_time, total_time, avg_time;
+    double start_time, finish_time, total_time, avg_time;
 
     MPI_Init(NULL, NULL);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        // start_time = MPI_Wtime();
+        start_time = MPI_Wtime();
 
         for (i = 0; i < n; ++i)
         {
@@ -168,8 +168,8 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            MPI_Allgather(MPI_IN_PLACE, rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
         }
+        MPI_Allgather(MPI_IN_PLACE, rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
     }
 
     // Reducing to unit matrix 
@@ -187,57 +187,30 @@ int main(int argc, char *argv[])
     // print the result
     if (rank == 0)
     {
+        finish_time = MPI_Wtime();
+
+        cout << n << endl;
+        
+        cout << "" << endl;
+
+        // Hitung total waktu yang dibutuhkan
+        total_time = finish_time - start_time;
+
+        // Hitung rata-rata waktu yang dibutuhkan
+        avg_time = total_time / size;
+        std::cout << "Time taken: " << total_time << " seconds" << std::endl;
+        std::cout << "Average time taken: " << avg_time << " seconds" << std::endl;
+        cout << "" << endl;
+
         for (i = 0; i < n; ++i)
         {
-            for (j = 0; j < 2 * n; ++j)
+            for (j = n; j < 2 * n; ++j)
             {
                 cout << flatMat[index1d(i, j, n)] << " ";
             }
             cout << endl;
         }
     }
-    // for (i = 0; i < rowCount[rank]; ++i)
-    // {
-    //     cout << "Process " << rank << ", element " << i << ": " << recvbuf[i] << endl;
-    // }
-    // MPI_Barrier(MPI_COMM_WORLD);
-    // if (rank == 0)
-    // {
-    //     finish_time = MPI_Wtime();
-
-    //     cout << n << endl;
-
-    //     cout << "" << endl;
-
-    //     // Hitung total waktu yang dibutuhkan
-    //     total_time = finish_time - start_time;
-    //     // MPI_Reduce(&total_time, &total_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-
-    //     // Hitung rata-rata waktu yang dibutuhkan
-    //     avg_time = total_time / size;
-    //     std::cout << "Time taken: " << total_time << " seconds" << std::endl;
-    //     std::cout << "Average time taken: " << avg_time << " seconds" << std::endl;
-    //     cout << "" << endl;
-
-    //     // for(i = 0; i < n; ++i)
-    //     // {
-    //     //     for(j = 0; j < 2*n; ++j)
-    //     //     {
-    //     //         if (abs(mat[i][j]) < 1e-5) {
-    //     //             cout << "0 ";
-    //     //         } else {
-    //     //             cout << mat[i][j] << " ";
-    //     //         }
-    //     //     }
-    //     //     cout << endl;
-    //     // }
-
-    //     // for (i = 0; i < n; ++i)
-    //     // {
-    //     //     delete[] mat[i];
-    //     // }
-    //     // delete[] mat;
-    // }
 
     // Deleting the memory allocated
     delete[] flatMat;

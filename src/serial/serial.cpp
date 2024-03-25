@@ -115,7 +115,7 @@ int main()
 
     for(i = 0; i < n; ++i)
     {
-        for(j = 0; j < 2*n; ++j)
+        for(j = n; j < 2*n; ++j)
         {
             if (abs(mat[i][j]) < 1e-5) {
                 cout << "0 ";
