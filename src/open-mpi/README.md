@@ -1,26 +1,23 @@
 # Tugas Kecil - Paralel Inverse Matrix dengan Open MPI
-
+Program ini merupakan program untuk melakukan eliminasi Gauss-Jordan terdistribusi secara paralel menggunakan MPI (Message Passing Interface).
 ## How to Run
 ```console
-user@user:~/kit-tucil-sister-2024$ mpic++ -o $(path_to_output_compile) $(path_to_source_code)
-user@user:~/kit-tucil-sister-2024$ mpirun -n $(num_of_process) $(path_to_output) < $(path_to_input_text) > $(path_to_output_text)
+user@user:~/if3230-tucil-brother_$ mpic++ -o $(path_to_output_compile) $(path_to_source_code)
+user@user:~/if3230-tucil-brother_$ mpirun -n $(num_of_process) $(path_to_output) < $(path_to_input_text) > $(path_to_output_text)
 ```
 *contoh bisa dilihat pada file makefile*
 
 ### Proses Kerja
-Program ini merupakan program untuk melakukan eliminasi Gauss-Jordan terdistribusi secara paralel menggunakan MPI (Message Passing Interface).
-
-Cara kerja program:
 
 1. Program diawali dengan inisialisasi MPI menggunakan `MPI_Init()` dan pengambilan informasi rank dan ukuran komunikator dengan `MPI_Comm_rank()` dan `MPI_Comm_size()`.
 
-2. Input Matriks dilakukan pada proses dengan rank 0. Matriks ini kemudian disiapkan untuk dimodifikasi menjadi matriks identitas dengan menambahkan kolom baru di sebelah kanan matriks.
+2. Input matriks dilakukan pada proses dengan rank 0. Matriks ini kemudian disiapkan untuk dimodifikasi menjadi matriks identitas pada right-hand side-nya.
 
-3. Broadcast Ukuran Matriks (n) kemudian disebarkan kepada semua proses menggunakan `MPI_Bcast()`.
+3. Broadcast ukuran matriks kemudian disebarkan kepada semua proses menggunakan `MPI_Bcast()`.
 
 4. Data matriks kemudian di-flatten (flatMat) dan dibagi-bagikan kepada proses-proses yang ada. Fungsi `distributeRow()` digunakan untuk menghitung jumlah elemen yang akan diterima oleh setiap proses.
 
-5. Setiap proses melakukan iterasi untuk melakukan eliminasi Gauss-Jordan terhadap bagian matriks yang diterimanya. Tiap proses hanya bekerja pada subset dari baris matriks.
+5. Setiap proses melakukan iterasi untuk melakukan eliminasi Gauss-Jordan terhadap bagian matriks yang diterimanya.
 
 6. Setelah setiap iterasi eliminasi, hasilnya digabungkan kembali menggunakan `MPI_Allgather()` sehingga semua proses memiliki akses ke seluruh matriks yang telah dimodifikasi.
 
