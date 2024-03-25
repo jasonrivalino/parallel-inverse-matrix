@@ -22,45 +22,9 @@ int *distributeRow(int totalElement, int colSize, int commSize)
     return result;
 }
 
-double *flattenMatrix(double **matrix, int size)
-{
-    double *flatMatrix = new double[size * size * 2];
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < 2 * size; j++)
-        {
-            flatMatrix[i * (2 * size) + j] = matrix[i][j];
-        }
-    }
-    return flatMatrix;
-}
-
-double **shapeMatrix(double *matrix, int size)
-{
-    double **shapedMatrix = new double *[size];
-    for (int i = 0; i < size; i++)
-    {
-        shapedMatrix[i] = new double[2 * size];
-        for (int j = 0; j < 2 * size; j++)
-        {
-            shapedMatrix[i][j] = matrix[i * (2 * size) + j];
-        }
-    }
-    return shapedMatrix;
-}
-
 int index1d(int row, int col, int size)
 {
     return row * (2 * size) + col;
-}
-
-int *index2d(int idx, int size)
-{
-    int *idx2d = new int[2];
-    idx2d[0] = idx / (2 * size);
-    idx2d[1] = idx % (2 * size);
-
-    return idx2d;
 }
 
 int main(int argc, char *argv[])
@@ -76,7 +40,6 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     int n;
-    double **mat = NULL;
     double *flatMat = NULL;
 
     MPI_Barrier(MPI_COMM_WORLD);
@@ -108,46 +71,29 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
-        mat = new double *[n];
-        for (i = 0; i < n; ++i)
-        {
-            mat[i] = new double[2 * n];
-        }
-
 
         // Inputs the coefficients of the matrix
         for (i = 0; i < n; ++i)
         {
-            for (j = 0; j < n; ++j)
+            for (j = 0; j < 2 * n; ++j)
             {
-                cin >> mat[i][j];
+                if (j < n)
+                {
+                    cin >> flatMat[index1d(i, j, n)];
+                }
+                else if (j == (i + n))
+                {
+                    flatMat[index1d(i, j, n)] = 1;
+                }
+                else
+                {
+                    flatMat[index1d(i, j, n)] = 0;
+                }
             }
         }
 
         start_time = MPI_Wtime();
 
-        for (i = 0; i < n; ++i)
-        {
-            for (j = n; j < 2 * n; ++j)
-            {
-                if (j == (i + n))
-                {
-                    mat[i][j] = 1;
-                }
-                else
-                {
-                    mat[i][j] = 0;
-                }
-            }
-        }
-
-        flatMat = flattenMatrix(mat, n);
-
-        for (i = 0; i < n; ++i)
-        {
-            delete[] mat[i];
-        }
-        delete[] mat;
     }
 
     MPI_Bcast(flatMat, 2 * n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -169,10 +115,10 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        MPI_Allgather(MPI_IN_PLACE, rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
+        MPI_Allgather(&flatMat[displs[rank]], rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
     }
 
-    // Reducing to unit matrix 
+    // Reducing to unit matrix
     for (i = startLocal; i < endLocal; ++i)
     {
         d = flatMat[index1d(i, i, n)];
@@ -181,7 +127,7 @@ int main(int argc, char *argv[])
             flatMat[index1d(i, j, n)] = flatMat[index1d(i, j, n)] / d;
         }
     }
-    
+
     MPI_Allgather(MPI_IN_PLACE, rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
 
     // print the result
@@ -190,7 +136,7 @@ int main(int argc, char *argv[])
         finish_time = MPI_Wtime();
 
         cout << n << endl;
-        
+
         cout << "" << endl;
 
         // Hitung total waktu yang dibutuhkan
