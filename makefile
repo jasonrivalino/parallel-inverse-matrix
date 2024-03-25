@@ -1,6 +1,6 @@
 OUTPUT_FOLDER = bin
 
-all: serial parallel dev
+all: serial parallel
 
 parallel:
 	mpic++ src/open-mpi/parallel.cpp -o $(OUTPUT_FOLDER)/parallel -lm
@@ -9,5 +9,5 @@ parallel:
 
 serial:
 	g++ src/serial/serial.cpp -o $(OUTPUT_FOLDER)/serial
-	mpiexec -n 1 ./bin/serial < test_cases/32.txt > test_cases/outputSerial.txt
+	./bin/serial < test_cases/32.txt > test_cases/outputSerial.txt
 	bin/serial < test_cases/32.txt
