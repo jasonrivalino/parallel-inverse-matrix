@@ -1,5 +1,5 @@
 # Tugas Kecil - Paralel Inverse Matrix dengan Open MPI
-Program ini merupakan program untuk melakukan eliminasi Gauss-Jordan terdistribusi secara paralel menggunakan MPI (Message Passing Interface).
+Program ini merupakan program untuk melakukan inverse dengan metode Gauss-Jordan yang terdistribusi secara paralel menggunakan MPI (Message Passing Interface).
 ## How to Run
 ```console
 user@user:~/if3230-tucil-brother_$ mpic++ -o $(path_to_output_compile) $(path_to_source_code)
@@ -21,7 +21,7 @@ user@user:~/if3230-tucil-brother_$ mpirun -n $(num_of_process) $(path_to_output)
 
 6. Setelah setiap iterasi eliminasi, hasilnya digabungkan kembali menggunakan `MPI_Allgather()` sehingga semua proses memiliki akses ke seluruh matriks yang telah dimodifikasi.
 
-7. Proses dengan rank 0 mencetak hasil matriks setelah eliminasi dan menghitung otal waktu yang dibutuhkan.
+7. Proses dengan rank 0 mencetak hasil matriks setelah eliminasi dan menghitung total waktu yang dibutuhkan.
 
 8. Setelah semua proses selesai, memori yang dialokasikan dibebaskan dan MPI ditutup dengan `MPI_Finalize()`.
 
