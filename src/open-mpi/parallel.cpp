@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
         }
 
         start_time = MPI_Wtime();
+
     }
 
     MPI_Bcast(flatMat, 2 * n * n, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -114,17 +115,7 @@ int main(int argc, char *argv[])
                 }
             }
         }
-        if (rank != 0)
-        {
-            MPI_Send(&flatMat[displs[rank]], rowCount[rank], MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-        }
-        else
-        {
-            for (int p = 1; p < size; p++)
-            {
-                MPI_Recv(&flatMat[displs[p]], rowCount[p], MPI_DOUBLE, p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            }
-        }
+        MPI_Allgather(&flatMat[displs[rank]], rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
     }
 
     // Reducing to unit matrix
@@ -137,17 +128,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (rank != 0)
-    {
-        MPI_Send(&flatMat[displs[rank]], rowCount[rank], MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
-    }
-    else
-    {
-        for (int p = 1; p < size; p++)
-        {
-            MPI_Recv(&flatMat[displs[p]], rowCount[p], MPI_DOUBLE, p, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        }
-    }
+    MPI_Allgather(MPI_IN_PLACE, rowCount[rank], MPI_DOUBLE, flatMat, rowCount[rank], MPI_DOUBLE, MPI_COMM_WORLD);
+
+    // print the result
     if (rank == 0)
     {
         finish_time = MPI_Wtime();
