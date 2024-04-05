@@ -12,3 +12,7 @@ parallelMPI:
 
 parallelMP:
 	gcc src/open-mp/parallel.cpp --openmp -g -Wall -o $(OUTPUT_FOLDER)/parallel -lm
+
+parallelMPMacbook:
+	g++-13 src/open-mp/parallel.cpp -fopenmp -o $(OUTPUT_FOLDER)/parallel -lm
+	./test_cases/parallel < test_cases/32.txt > test_cases/outputParallel.txt
