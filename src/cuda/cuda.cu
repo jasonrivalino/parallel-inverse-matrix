@@ -3,7 +3,7 @@
 #include <ctime>
 #include <cmath>
 #include <cuda_runtime.h>
-#include <iomanip>
+#include <iomanip> // for std::setw
 
 __global__ void makeRightHandSideIdentity(double *mat, int n) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -21,7 +21,7 @@ __global__ void makeRightHandSideIdentity(double *mat, int n) {
 __global__ void partialPivoting(double *mat, int n) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n - 1) {
-        if (mat[tid * (2 * n) + 1] < mat[(tid + 1) * (2 * n) + 1]) {
+        if (mat[tid * (2 * n) + 1] > mat[(tid + 1) * (2 * n) + 1]) {
             for (int j = 0; j < 2 * n; ++j) {
                 double temp = mat[tid * (2 * n) + j];
                 mat[tid * (2 * n) + j] = mat[(tid + 1) * (2 * n) + j];
@@ -116,8 +116,8 @@ int main() {
     partialPivoting<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
 
-    // std::cout << "Content of d_mat after partial pivoting:" << std::endl;
-    // printDeviceMatrix(d_mat, n);
+    std::cout << "Content of d_mat after partial pivoting:" << std::endl;
+    printDeviceMatrix(d_mat, n);
 
     reduceToDiagonal<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
