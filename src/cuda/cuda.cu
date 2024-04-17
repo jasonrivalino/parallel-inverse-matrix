@@ -1,5 +1,3 @@
-%%writefile cuda.cu
-
 #include <stdio.h>
 #include <iostream>
 #include <ctime>
@@ -65,6 +63,18 @@ __global__ void reduceToUnitMatrix(double *mat, int n) {
 void printMatrix(double *mat, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < 2 * n; ++j) {
+            if (std::abs(mat[i * (2 * n) + j]) < std::exp(-5))
+                std::cout << std::setw(8) << 0 << " ";
+            else
+                std::cout << std::setw(8) << mat[i * (2 * n) + j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void printResultMatrix(double *mat, int n) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = n; j < 2 * n; ++j) {
             if (std::abs(mat[i * (2 * n) + j]) < std::exp(-5))
                 std::cout << std::setw(8) << 0 << " ";
             else
@@ -149,8 +159,8 @@ int main() {
     cudaMemcpy(mat, d_mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyDeviceToHost);
 
     // Print the output matrix
-    // std::cout << "Output matrix:" << std::endl;
-    // printMatrix(mat, n);
+    std::cout << "Output matrix:" << std::endl;
+    printResultMatrix(mat, n);
 
     // Free memory
     delete[] mat;
