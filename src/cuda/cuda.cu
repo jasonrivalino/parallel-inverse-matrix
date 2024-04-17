@@ -107,18 +107,10 @@ int main() {
         }
     }
 
-    // Print the input matrix
-    // std::cout << "Input matrix:" << std::endl;
-    // printMatrix(mat, n);
-
     // CUDA memory allocation
     double *d_mat;
     cudaMalloc((void **)&d_mat, (2 * n) * (2 * n) * sizeof(double));
     cudaMemcpy(d_mat, mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyHostToDevice);
-
-    // Print the content of d_mat after memory copy
-    // std::cout << "Content of d_mat after memory copy:" << std::endl;
-    // printDeviceMatrix(d_mat, n);
 
     // Launch CUDA kernels
     int tpb = static_cast<int>(sqrt(n/2));
@@ -130,15 +122,18 @@ int main() {
     makeRightHandSideIdentity<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
 
-    std::cout << "Content of d_mat after making right hand side identity:" << std::endl;
-    printDeviceMatrix(d_mat, n);
+    // Partial Pivoting
+    for (int i = n; i > 1; --i) {
+        if (mat[2*n*(i - 1)+1] < mat[2*n*i+1]) {
+            for (int j = 0; j < 2 * n; ++j) {
+                double d = mat[2*n*i+j];
+                mat[2*n*i+j] = mat[2*n*(i - 1)+j];
+                mat[2*n*(i - 1)+j] = d;
+            }
+        }
+    }
 
-    // partialPivoting<<<numBlocks, threadsPerBlock>>>(d_mat, n);
-    // cudaDeviceSynchronize();
-
-    // std::cout << "Content of d_mat after partial pivoting:" << std::endl;
-    // printDeviceMatrix(d_mat, n);
-
+    // Reduce to Diagonal Matrix
     for (int i = 0; i < n; ++i){
         if (mat[i*2*n + i] != 0){
             reduceToDiagonal<<<numBlocks, threadsPerBlock>>>(d_mat, n, i);
@@ -146,14 +141,9 @@ int main() {
         cudaDeviceSynchronize();
     }
 
-    std::cout << "\nContent of d_mat after reduce to diagonal:" << std::endl;
-    printDeviceMatrix(d_mat, n);
-
+    // Reduce to Unit Matrix
     reduceToUnitMatrix<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
-
-    std::cout << "Content of d_mat after reducing to unit matrix:" << std::endl;
-    printDeviceMatrix(d_mat, n);
 
     // Copy results back to CPU
     cudaMemcpy(mat, d_mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyDeviceToHost);
