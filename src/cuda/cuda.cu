@@ -3,8 +3,7 @@
 #include <ctime>
 #include <cmath>
 #include <cuda_runtime.h>
-#include <iomanip> // for std::setw
-
+#include <iomanip>
 
 __constant__ int sqrtThreadsPerBlock;
 
@@ -60,18 +59,6 @@ __global__ void reduceToUnitMatrix(double *mat, int n) {
     }
 }
 
-void printMatrix(double *mat, int n) {
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < 2 * n; ++j) {
-            if (std::abs(mat[i * (2 * n) + j]) < std::exp(-5))
-                std::cout << std::setw(8) << 0 << " ";
-            else
-                std::cout << std::setw(8) << mat[i * (2 * n) + j] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
 void printResultMatrix(double *mat, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = n; j < 2 * n; ++j) {
@@ -84,30 +71,23 @@ void printResultMatrix(double *mat, int n) {
     }
 }
 
-void printDeviceMatrix(double *d_mat, int n) {
-    double *temp_mat = new double[2 * n * 2 * n];
-    cudaMemcpy(temp_mat, d_mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyDeviceToHost);
-    printMatrix(temp_mat, n);
-    delete[] temp_mat;
-}
-
 int main() {
     int n;
     double *mat = nullptr;
 
     std::cin >> n;
 
-    // Allocate memory for matrix array on CPU
+    // Allocate ukuran matriks
     mat = new double[2 * n * 2 * n];
 
-    // Inputs the coefficients of the matrix
+    // Input nilai dalam matriks
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             std::cin >> mat[i * (2 * n) + j];
         }
     }
 
-    // CUDA memory allocation
+    // CUDA memory allocation ke GPU
     double *d_mat;
     cudaMalloc((void **)&d_mat, (2 * n) * (2 * n) * sizeof(double));
     cudaMemcpy(d_mat, mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyHostToDevice);
@@ -118,7 +98,7 @@ int main() {
     dim3 threadsPerBlock(tpb, tpb);
     dim3 numBlocks(n, 4);
 
-    // Call CUDA kernel to make right hand side identity
+    // Right hand side identity
     makeRightHandSideIdentity<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
 
@@ -145,10 +125,10 @@ int main() {
     reduceToUnitMatrix<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
 
-    // Copy results back to CPU
+    // Copy hasil balik ke CPU
     cudaMemcpy(mat, d_mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyDeviceToHost);
 
-    // Print the output matrix
+    // Print output matrix
     std::cout << "Output matrix:" << std::endl;
     printResultMatrix(mat, n);
 
