@@ -1,3 +1,5 @@
+%%writefile cuda.cu
+
 #include <stdio.h>
 #include <iostream>
 #include <ctime>
@@ -63,7 +65,10 @@ __global__ void reduceToUnitMatrix(double *mat, int n) {
 void printMatrix(double *mat, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < 2 * n; ++j) {
-            std::cout << std::setw(8) << mat[i * (2 * n) + j] << " ";
+            if (std::abs(mat[i * (2 * n) + j]) < std::exp(-5))
+                std::cout << std::setw(8) << 0 << " ";
+            else
+                std::cout << std::setw(8) << mat[i * (2 * n) + j] << " ";
         }
         std::cout << std::endl;
     }
@@ -131,8 +136,8 @@ int main() {
         cudaDeviceSynchronize();
     }
 
-    // std::cout << "\nContent of d_mat after reduce to diagonal:" << std::endl;
-    // printDeviceMatrix(d_mat, n);
+    std::cout << "\nContent of d_mat after reduce to diagonal:" << std::endl;
+    printDeviceMatrix(d_mat, n);
 
     reduceToUnitMatrix<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
