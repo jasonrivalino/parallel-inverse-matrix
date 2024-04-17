@@ -48,14 +48,15 @@ __global__ void reduceToDiagonal(double *mat, int n, int currentRow) {
 }
 
 __global__ void reduceToUnitMatrix(double *mat, int n) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < n) {
-        if (mat[tid * (2 * n) + tid] != 0) {
-            double d = mat[tid * (2 * n) + tid]; // Use d here
-            for (int j = tid; j < 2 * n; ++j) {
-                mat[tid * (2 * n) + j] = mat[tid * (2 * n) + j] / d;
-            }
+    __shared__ double d;
+    int tid = (blockIdx.y * sqrtThreadsPerBlock * sqrtThreadsPerBlock) + (threadIdx.x * sqrtThreadsPerBlock + threadIdx.y);
+    if (mat[blockIdx.x * 2*n + blockIdx.x] != 0) {
+        if (threadIdx.x + threadIdx.y == 0)
+        {
+            d = mat[blockIdx.x * 2*n + blockIdx.x];
         }
+        __syncthreads();
+        mat[blockIdx.x * 2*n + tid] /= d;
     }
 }
 
@@ -114,8 +115,8 @@ int main() {
     makeRightHandSideIdentity<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
 
-    // std::cout << "Content of d_mat after making right hand side identity:" << std::endl;
-    // printDeviceMatrix(d_mat, n);
+    std::cout << "Content of d_mat after making right hand side identity:" << std::endl;
+    printDeviceMatrix(d_mat, n);
 
     // partialPivoting<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     // cudaDeviceSynchronize();
@@ -130,11 +131,14 @@ int main() {
         cudaDeviceSynchronize();
     }
 
-    std::cout << "\nContent of d_mat after reduce to diagonal:" << std::endl;
-    printDeviceMatrix(d_mat, n);
+    // std::cout << "\nContent of d_mat after reduce to diagonal:" << std::endl;
+    // printDeviceMatrix(d_mat, n);
 
     reduceToUnitMatrix<<<numBlocks, threadsPerBlock>>>(d_mat, n);
     cudaDeviceSynchronize();
+
+    std::cout << "Content of d_mat after reducing to unit matrix:" << std::endl;
+    printDeviceMatrix(d_mat, n);
 
     // Copy results back to CPU
     cudaMemcpy(mat, d_mat, (2 * n) * (2 * n) * sizeof(double), cudaMemcpyDeviceToHost);
