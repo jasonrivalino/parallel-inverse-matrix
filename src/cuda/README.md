@@ -11,4 +11,4 @@ Program ini merupakan program untuk melakukan eliminasi Gauss-Jordan terdistribu
 7. Memori yang dialokasikan baik di host maupun di perangkat didealokasikan menggunakan delete[] dan cudaFree.
 
 ## Skema Distribusi Data:
-Setiap baris matrix didistribusikan ke 4 blok, dimana setiap blok terdiri dari setengah dari n/2 thread. Alasan pemilihan skema ini adalah jika terdapat matrix dengan ukuran 2048 x 2048, maka setiap blok akan memiliki 1024 thread, sehingga setiap blok akan memiliki 1024 thread yang akan melakukan perhitungan secara paralel. Hal ini akan dapat mempercepat proses perhitungan.
+Setiap baris matrix didistribusikan ke 4 blok, dimana setiap blok terdiri dari n/2 thread. Alasan pemilihan skema ini adalah banyak thread maksimun dalam satu blok adalah 1024 thread, dan pada test case terbesar yang diberikan adalah matriks dengan ukuran 2048x2048, dimana setelah dijadikan matriks augmented ukuran menjadi 2048x4096, sehingga 1 baris akan membutuhkan 4 blok yang berisi 4096 thread, agar 1 thread hanya perlu menghitung 1 elemen matriks augmented.
