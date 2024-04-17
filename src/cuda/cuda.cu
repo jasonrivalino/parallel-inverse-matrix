@@ -62,10 +62,7 @@ __global__ void reduceToUnitMatrix(double *mat, int n) {
 void printResultMatrix(double *mat, int n) {
     for (int i = 0; i < n; ++i) {
         for (int j = n; j < 2 * n; ++j) {
-            if (std::abs(mat[i * (2 * n) + j]) < std::exp(-5))
-                std::cout << std::setw(8) << 0 << " ";
-            else
-                std::cout << std::setw(8) << mat[i * (2 * n) + j] << " ";
+            std::cout << std::setw(8) << mat[i * (2 * n) + j] << " ";
         }
         std::cout << std::endl;
     }
